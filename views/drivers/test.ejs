@@ -1,0 +1,22 @@
+<% if(dateIn.times.length > 1){ %> 
+                        
+    <% for(let i =1; i < dateIn.times.length; i++){ %>
+        
+        <div class="card" style="display: inline-block;">
+        <label for="time">From</label>
+        <input type="time" name="ftime" required 
+        value="<%= dateIn.times[i].split('-')[0] %>">
+          
+        <label for="time">To</label>
+        <input type="time" name="ttime" required
+        value="<%= dateIn.times[i].split('-')[1] %>"
+        <% if(editing){ %> form: 
+        > 
+            
+        </div>
+        <br>
+        <% if(editing){ %>
+            </form>
+         <% } %>   
+    <% } %>  
+<% } %>  

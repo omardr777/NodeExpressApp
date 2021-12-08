@@ -1,0 +1,71 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/orders.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+    
+     <main>
+       
+
+        <% if (requests.length > 0) { %>
+            <!-- <div class="grid"> -->
+            <%- include('../includes/pagination.ejs',{currentPage:currentPage,nextPage:nextPage,previousPage:previousPage,lastPage:lastPage,hasNextPage:hasNextPage,hasPreviousPage:hasPreviousPage}) %>
+                <br>    
+                <ul class="orders">
+                    <% for (let request of requests) { %>
+                    
+                        <li class="orders__item <% if(request.special == true){ %> special <% } %>">
+                            <h1 ><%=request.dateId.day  %></h1>
+                            <h1> <%=request.time %> </h1>
+                            <ul class="orders__products">
+                                
+                                <li class="orders__products" style="color: black; font-weight: bold; margin-top: 1rem;">from: <%=request.userId.name  %></li>
+                                <% if(request.description){ %> 
+                                <li class="orders__products-item" style="max-width: 20rem;">description: <%= request.description %><li>
+                                    <% } %> 
+                                <li class="orders__products" style="font-weight: bold;">status : <%=request.status  %></li>
+                                
+
+                            </ul>
+                            <div class="centered">
+                            <form action="/requests/accept-request/<%=request._id %>" method="post">
+                                <input type="hidden" name="timeId" value="<%= request.timeId %>">
+                                <input type="hidden" name="userId" value="<%= request.userId._id %>">
+                                <input type="hidden" name="special" value="<%= request.special %>">
+                                <input type="hidden" name="date" value="<%= request.dateId.day %>">
+                                <input type="hidden" name="time" value="<%= request.time %>">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <% if(request.status == 'Accepted'){ %> 
+                                <button type="submit" class="btn pointer" onclick="return false">Accept</button>
+                                <% }else{ %> 
+                                <button type="submit" class="btn" >Accept</button>
+                                <% } %> 
+                            </form>
+                            <form action="/requests/reject-request/<%=request._id %>" method="post">
+                                <input type="hidden" name="timeId" value="<%= request.timeId %>">
+                                <input type="hidden" name="userId" value="<%= request.userId._id %>">
+                                <input type="hidden" name="time" value="<%= request.time %>">
+                                <input type="hidden" name="special" value="<%= request.special %>">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <% if(request.status == 'Rejected'){ %> 
+                                    <button type="submit" class="btn danger pointer" onclick="return false">Reject</button>
+                                    <% }else{ %> 
+                                        <button type="submit" class="btn danger">Reject</button>
+                                    <% } %> 
+                               
+                            </form>
+                        </div>
+                        </li>
+                    
+                <% } %>
+                </ul>
+                
+            <!-- </div> -->
+            
+        <% } else { %>
+            <h1>You have no requests</h1>
+        <% } %> 
+    </main>
+<%- include('../includes/end.ejs') %>

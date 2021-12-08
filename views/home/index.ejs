@@ -1,0 +1,39 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js"></script>
+    <style>
+  
+
+canvas {
+  border: 1px dotted red;
+}
+
+.chart-container {
+  position: relative;
+  margin: auto;
+  height: 80vh;
+  width: 80vw;
+}
+
+    </style>
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+     <main>
+         <% if(isAuthenticated){ %> 
+            <select name="cars" id="types" onchange="myFunction()">
+                <option value="bar">Bar</option>
+                <option value="line">Line</option> 
+            </select>
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+        <input type="hidden" id="userId" value="<%= userId %>">
+        <% }else { %> 
+            <h1>You have to login</h1>
+            <% } %> 
+    </main>
+    <script src="/js/chart.js"></script>
+<%- include('../includes/end.ejs') %>

@@ -1,0 +1,58 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+    
+        <div class="centerd">
+            <br>
+            <% if(successMessage){ %>
+                <div class="user-message user-message--success"><%= successMessage %> </div>
+            <% } %>
+
+                <header class="card__header">
+                    <h1 class="product__title"><%=driver.name %></h1>
+                </header>
+                
+                <div class="card__content">
+                    <h2 class="product__price"><%=driver.email  %></h2>
+                    
+                </div>
+                <div class="grid">
+                    <% if(dates.length > 0){ %> 
+                        <% for(let date of dates) {%>
+                            <div class="card"><%=date.day%> 
+                                <h4>available times</h4>
+                                <% for(let i of date.times) {%>
+                                    <% if(i.status == 'used'){ %> 
+                                        <a class="btn pointer" href=""onclick="return false"><%= i.from  %> - <%= i.to %> (used)</a> 
+                                    <% } else {%>
+                                        
+                                        <a class="btn" href="/requests/get-dips/<%=i._id %>"  ><%= i.from  %> - <%= i.to %> </a>
+                                    <%}  %> 
+                                 
+                                 <br>
+                                 <br>
+                                <% } %> 
+                            </div>
+                            
+                        <% } %>   
+                      
+
+                    <% } else{%>
+                        <h2> there is no available times</h2>
+                    <% } %> 
+                </div>
+                <br>
+                <div class="centered">
+                    <a class="btn" href="/requests/special-request/<%= driver._id%>">Special Request</a>
+                </div>
+                <%- include('../includes/pagination.ejs',{currentPage:currentPage,nextPage:nextPage,previousPage:previousPage,lastPage:lastPage,hasNextPage:hasNextPage,hasPreviousPage:hasPreviousPage}) %>
+               
+            
+        </div>
+        
+    
+
+<%- include('../includes/end.ejs') %>

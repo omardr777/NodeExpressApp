@@ -1,0 +1,66 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/forms.css">
+</head>
+<body>
+    <%- include('../includes/navigation.ejs') %>
+    
+        <h1 style="text-align: center;"><%= pageTitle %> </h1>
+        <% if(errorMessage){ %>
+            <div class="user-message user-message--error"><%= errorMessage %> </div>
+        <% } %>  
+        <div class="centered">
+            <form action="/date/updateDate/<%= dateIn._id %>" method="post">
+
+                <div class="container centered">
+                    <div class="form-control">
+                        <label for="date">Day</label>
+                        <input type="date" name="date" style="margin: auto; width: auto;" readonly value="<%= dateIn.day %>" >
+                    </div>
+                </div>
+
+                <div id="cardContainer" class="card-container centered">
+                    
+                    <div class="card" style="display: inline-block;">
+                        <label for="time">From</label>
+                        <input type="time" name="ftime" 
+                        value="<%= dateIn.times[0].from%>" required> 
+                        <label for="time">To</label>
+                        <input type="time" name="ttime" 
+                        value="<%= dateIn.times[0].to %>" required> 
+                        
+                    </div>
+                    <br>
+                    <% if(dateIn.times.length > 1){ %> 
+                        
+                        <% for(let i =1; i < dateIn.times.length; i++){ %>
+                            
+                            <div class="card" style="display: inline-block;">
+                            <label for="time">From</label>
+                            <input type="time" name="ftime" required 
+                            value="<%= dateIn.times[i].from %>">
+                              
+                            <label for="time">To</label>
+                            <input type="time" name="ttime" required
+                            value="<%= dateIn.times[i].to %>" > 
+                            <a class="btn danger" href="/date/delete-time/<%= dateIn.times[i]._id %>" >remove </a>
+                                
+                            </div>
+                            <br>
+                           
+                        <% } %>  
+                    <% } %>  
+                    <a id="addBtn" class="btn" style=" padding: 0.5rem; margin: 1rem auto; display: inline-block;">Add</a>
+                </div>
+                
+                <!-- use hidden input to send all times -->
+                
+                <br>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn" type="submit"> Update </button>
+            </form>
+        </div>
+        
+
+<script src="/js/addBtn.js"
+<%- include('../includes/end.ejs') %>

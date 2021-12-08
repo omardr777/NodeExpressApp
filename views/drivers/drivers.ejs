@@ -1,0 +1,25 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+    <% if(drivers.length > 0) {%> 
+        <% for (let driver of drivers) { %>
+            <article class="card product-item">
+                <header class="card__header">
+                    <h1 class="product__title"><%= driver.name %></h1>
+                </header>
+                
+                <div class="card__content">
+                    <h2 class="product__price"><%= driver.email %></h2>
+                    
+                </div>
+               <a class="btn" href="/drivers/get-driver/<%= driver._id %>">Pick</a>
+            </article>
+        <% } %>
+    <% }else{ %>
+        <h1>No Drivers Found!</h1>
+    <% } %>  
+
+<%- include('../includes/end.ejs') %>
