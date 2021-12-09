@@ -149,7 +149,9 @@ const store = new MongoDBStore({
     collection: 'sessions'
 })
 const csrfProtection = csrf();
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false,
+}));
 app.use(compression());
 
 //middlewares
