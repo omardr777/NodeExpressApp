@@ -29,7 +29,7 @@ console.log(requests)
 let dateObj = new Date();
 let title;
 async function getData1() {
-    const response = await fetch('http://localhost:3000/user/chart-data');
+    const response = await fetch(location.protocol + '//' + location.host + "user/chart-data");
     const data = await response.json();
     if (data.driver == false) {
         title = "Accepted requests for this month (" + (dateObj.getMonth() + 1) + ")";
