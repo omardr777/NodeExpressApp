@@ -121,7 +121,7 @@
 //     });
 const express = require('express');
 const app = express();
-require('dotenv').config();
+// require('dotenv').config();
 const compression = require('compression');
 const helmet = require('helmet');
 
