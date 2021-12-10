@@ -5,15 +5,16 @@ const Request = require('../models/requests')
 const flashMessage = require('../middleware/flashMessage');
 
 const ITEMS_PER_PAGE = 3;
-
+const Points_for_Special = 50;
+const Points_for_Normal = 10;
 
 exports.getRequests = (req, res, next) => {
     const driverId = req.user._id;
     const page = +req.query.page || 1;
     let totalItems;
     Request.countDocuments()
-        .then(number => {
-            totalItems = number;
+        .then(numberOfRequests => {
+            totalItems = numberOfRequests;
             return Request.find({ driverId: driverId })
                 .sort({ status: -1 })
                 .skip((page - 1) * ITEMS_PER_PAGE)
@@ -37,18 +38,12 @@ exports.getRequests = (req, res, next) => {
 
 exports.getDips = (req, res, next) => {
     const timeId = req.params.timeId;
-    let ob;
-
     DateO.findOne({ 'times._id': timeId })
         .populate('userId')
         .then(date => {
-            console.log(date.times)
             let time;
             let index = date.times.findIndex(item => item._id === timeId);
-            console.log("Logged Output ~ file: drivers.js ~ line 350 ~ index", index)
-
             time = date.times[index];
-            // res.send(timeId)
             res.render('request/get-dips', {
                 pageTitle: "dips",
                 path: 'dips',
@@ -56,20 +51,6 @@ exports.getDips = (req, res, next) => {
                 time: time
             })
         })
-    // TimeO.findById(timeId)
-    //     .select('from to dateId')
-    //     .populate({
-    //         path: 'dateId', model: 'Date', populate: { path: 'userId', medel: 'User', select: 'name email _id' }
-    //     })
-    //     .then(time => {
-    //         ob = time;
-    //         res.render('drivers/get-dips', {
-    //             pageTitle: "dips",
-    //             path: 'dips',
-    //             data: time
-    //         })
-    //     })
-
 }
 
 exports.postRequest = (req, res, next) => {
@@ -79,10 +60,7 @@ exports.postRequest = (req, res, next) => {
     const description = req.body.description;
     const dateId = req.body.dateId;
     let time;
-
-    console.log(userId + " \n" + driverId)
     DateO.findOne({ 'times._id': timeId })
-
         .then(date => {
             console.log(date.times)
             let index = date.times.findIndex(item => item._id === timeId);
@@ -110,34 +88,6 @@ exports.postRequest = (req, res, next) => {
 
         })
         .catch(err => console.log(err))
-
-    // TimeO.findById(timeId)
-    //     .populate({
-    //         path: 'dateId', model: 'Date', populate: { path: 'userId', medel: 'User', select: 'name email _id' }
-    //     })
-    //     .then(time => {
-    //         return Request.create({
-    //             time: time._id,
-    //             userId: userId,
-    //             driverId: time.dateId.userId._id,
-    //             description: description
-    //         })
-    //     })
-    //     .then(request => {
-    //         console.log(request)
-    //         User.findById(request.userId)
-    //             .then(user => {
-    //                 user.requests.push(request);
-    //                 return user.save();
-    //             }).then(result => {
-    //                 console.log(result)
-    //                 res.redirect('/drivers')
-    //             });
-
-    //     })
-
-    //     .catch(err => console.log(err))
-
 }
 
 exports.acceptRequest = (req, res, next) => {
@@ -147,47 +97,15 @@ exports.acceptRequest = (req, res, next) => {
     const time = req.body.time;
     let day = req.body.date;
     const driverId = req.user._id;
-    // console.log(day)
-    let date = new Date(day)
-    // console.log("date", date)
-    // Request.find({ 'timeId': timeId })
-    //     .then(requests => {
-    //         console.log(requests)
-    //     })
-    // Request.find().populate({
-    //     path: 'dateId', model: 'Date', populate: { path: 'userId', medel: 'User' }
-    // }).then(reqeust => {
-    //     console.log(reqeust[0].dateId.day)
-    //     dateId = reqeust[0].dateId._id
-
-    //     Request.find({ 'dateId.userId.name': "omar" })
-    //         .then(result => {
-    //             console.log('result', result)
-    //             res.send(result)
-    //         })
-    // })
-    // Request.find({ time: time, driverId: driverId,date:day }).populate('dateId')
-    //     .then(request => {
-    //         // console.log(request)
-    //         return Request.updateMany({ time: time, driverId: driverId, "dateId.day": date }, { status: "Rejected" })
-    //     })
-    //     .then(requests => {
-    //         console.log(requests)
-    //     })
-    //     .catch(err => console.log(err))
 
     Request.find({ time: time, driverId: driverId, date: day }).populate('dateId')
         .then(result => {
-            console.log('d\n\n\n\n\n\n\n\nd', result)
             return Request.updateMany({ date: day, time: time, driverId: driverId }, { status: 'Rejected' })
         })
         .then(requests => {
-            console.log("\n\nLogged Output ~ file: rController.js ~ line 154 ~ requests\n\n", requests)
             DateO.findOne({ 'times._id': timeId })
                 .then(date => {
                     let times = date.times;
-                    // console.log(date.times)
-                    let time;
                     let index = times.findIndex(item => item._id === timeId);
                     console.log(index)
                     if (times[index].status != 'used') {
@@ -209,9 +127,10 @@ exports.acceptRequest = (req, res, next) => {
         .then(user => {
             let newPoints;
             if (special == "true")
-                newPoints = user.points - 50;
+                newPoints = user.points - Points_for_Special;
             else
-                newPoints = user.points - 10;
+                newPoints = user.points - Points_for_Normal;
+
             user.points = newPoints;
             return user.save();
         })
@@ -223,10 +142,6 @@ exports.acceptRequest = (req, res, next) => {
 
 exports.rejectRequest = (req, res, next) => {
     const requestId = req.params.requestId;
-
-    const timeId = req.body.timeId;
-
-
     Request.findById(requestId)
         .then(request => {
             let oldStatus = request.status;
@@ -234,7 +149,7 @@ exports.rejectRequest = (req, res, next) => {
                 User.findById(request.userId)
                     .then(user => {
                         console.log(user)
-                        let newPoints = user.points + 50;
+                        let newPoints = user.points + Points_for_Special;
                         user.points = newPoints;
                         return user.save();
                     })
@@ -247,23 +162,15 @@ exports.rejectRequest = (req, res, next) => {
             }
         })
         .then(savedRequested => {
-            //console.log("Logged Output ~ file: drivers.js ~ line 464 ~ request", request)
             res.redirect('/requests')
         }).catch(err => console.log(err))
-
-    // Request.findByIdAndUpdate(requestId, { status: "Rejected" })
-    //     .then(request => {
-    //         console.log("Logged Output ~ file: drivers.js ~ line 464 ~ request", request)
-    //         res.redirect('/requests')
-    //     })
-    //     .catch(err => console.log(err))
 }
 
 exports.getSRequest = (req, res, next) => {
     const driverId = req.params.driverId;
     let message = flashMessage.errorMessage(req);
     dateObj = new Date();
-    let myDate = (dateObj.getFullYear()) + "-" + (dateObj.getMonth() + 1) + "-" + (dateObj.getDate());
+    let theDate = (dateObj.getFullYear()) + "-" + (dateObj.getMonth() + 1) + "-" + (dateObj.getDate());
     User.findById(driverId)
         .then(user => {
             if (!user) {
@@ -273,7 +180,7 @@ exports.getSRequest = (req, res, next) => {
                 pageTitle: 'Special Request',
                 path: '/drivers',
                 errorMessage: message,
-                minDate: myDate,
+                minDate: theDate,
                 driverId: driverId
             })
         })

@@ -82,7 +82,6 @@ exports.postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     const errors = validationResult(req);
-    console.log("Logged Output ~ file: dateController.js ~ line 19 ~ errors", errors)
 
     if (!errors.isEmpty()) {
         console.log('fuck')
@@ -126,7 +125,6 @@ exports.postLogout = (req, res, next) => {
 }
 
 exports.getUserData = (req, res, next) => {
-    // const userId = req.params.userId;
     let userId;
     let isDriver;
     if (req.user) {
@@ -135,13 +133,7 @@ exports.getUserData = (req, res, next) => {
     }
     else
         res.send("You are not authenticated")
-    // console.log(userId)
-    // User.findById(userId)
-    //     .populate('dates')
-    //     .then(user => {
-    //         // console.log(user)
-    //         res.json({ success: true, days: user.dates })
-    //     })
+
     if (!isDriver)
         Request.find({ status: 'Accepted', userId: userId })
             .populate('dateId')
@@ -188,33 +180,15 @@ exports.postResetPassword = (req, res, next) => {
                 user.f = 'fuck';
                 return user.save()
             }).then((result) => {
-                console.log(result)
-                console.log(`http://localhost:3000/user/reset/${token}`);
-                res.redirect('http://localhost:3000/')
+
+                console.log(`http://${req.hostname}/user/reset/${token}`);
+                res.redirect('/')
             });
     })
 
 }
 
 exports.getNewPassword = (req, res, next) => {
-    // const resetToken = req.params.token;
-    // User.findOne({ resetToken: resetToken, tokenExpreation: { $gt: Date.now() } })
-    //     .then(user => {
-    //         if (user) {
-    //             console.log("from Get", user)
-    //             let message = flashMessage.errorMessage(req);
-    //             res.render('auth/new-password', {
-    //                 pageTitle: 'New Password',
-    //                 path: '/new-password',
-    //                 errorMessage: message,
-    //                 userId: user._id.toString(),
-    //                 passwordToken: resetToken
-    //             })
-    //         } else {
-    //             res.send('f')
-    //         }
-    //     })
-    //     .catch(err => console.log(err))
     const token = req.params.token;
     User.findOne(
         {
@@ -222,7 +196,6 @@ exports.getNewPassword = (req, res, next) => {
             tokenExpreation: { $gt: Date.now() }
         })
         .then(user => {
-            console.log("find user????", user)
             let message = req.flash('error');
             if (message.length > 0) {
                 message = message[0];
@@ -245,30 +218,7 @@ exports.getNewPassword = (req, res, next) => {
 }
 
 exports.postNewPassword = (req, res, next) => {
-    // const newPassword = req.body.password;
-    // const userId = req.body.userId;
-    // const passToken = req.body.passwordToken;
-    // let updatedUser;
-    // User.findOne({ resetToken: passToken, tokenExpreation: { $gt: Date.now() }, _id: userId })
-    //     .then(user => {
-    //         if (!user) {
-    //             res.send('hacker')
-    //         }
-    //         updatedUser = user;
-    //         return bcrypt.hash(newPassword, 12)
-    //     }).then(hashedPass => {
-    //         updatedUser.password = hashedPass;
-    //         updatedUser.resetToken = undefined;
-    //         updatedUser.tokenExpreation = undefined;
-    //         return updatedUser.save();
-    //     })
-    //     .then(result => {
-    //         console.log(result)
-    //         res.redirect('/user/login')
-    //     })
-    //     .catch(err => console.log(err))
     const userId = req.body.userId;
-    console.log(userId)
     const newPassword = req.body.password;
     const passwordToken = req.body.passwordToken;
     let resetUser;
@@ -291,7 +241,3 @@ exports.postNewPassword = (req, res, next) => {
         });
 
 }
-
-//.populate({
-    //     //         path: 'dateId', model: 'Date', populate: { path: 'userId', medel: 'User', select: 'name email _id' }
-    //     //     })
