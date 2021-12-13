@@ -38,9 +38,3 @@ addBtn.addEventListener('click', () => {
 const reomveCard = (btn) => {
     console.log(btn)
 }
-{/* <div class="card" style="display: inline-block;">
-                        <label for="time">From</label>
-                        <input type="time" name="ftime"> 
-                        <label for="time">To</label>
-                        <input type="time" name="ttime"> 
-                    </div> */}

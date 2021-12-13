@@ -1,7 +1,7 @@
 
 const express = require('express');
 const app = express();
-// require('dotenv').config();
+require('dotenv').config();
 const compression = require('compression');
 const helmet = require('helmet');
 const path = require('path');
@@ -54,7 +54,8 @@ app.use(session({
     secret: 'asdlfkajfdhuahdfpjk',
     resave: false,
     saveUninitialized: false,
-    store: store
+    store: store,
+
 }))
 app.use(csrfProtection)
 app.use(flash())

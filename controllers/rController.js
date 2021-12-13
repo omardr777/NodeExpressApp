@@ -1,6 +1,5 @@
 const User = require('../models/user');
 const DateO = require('../models/dateo');
-const TimeO = require('../models/timeO');
 const Request = require('../models/requests')
 const flashMessage = require('../middleware/flashMessage');
 
@@ -98,46 +97,50 @@ exports.acceptRequest = (req, res, next) => {
     let day = req.body.date;
     const driverId = req.user._id;
 
-    Request.find({ time: time, driverId: driverId, date: day }).populate('dateId')
-        .then(result => {
-            return Request.updateMany({ date: day, time: time, driverId: driverId }, { status: 'Rejected' })
-        })
-        .then(requests => {
-            DateO.findOne({ 'times._id': timeId })
-                .then(date => {
-                    let times = date.times;
-                    let index = times.findIndex(item => item._id === timeId);
-                    console.log(index)
-                    if (times[index].status != 'used') {
-                        times[index].status = 'used';
-                        date.times = [];
-                        date.times = times;
-                        return date.save();
-                    }
-                })
-                .then((test) => {
-                    console.log(test)
-                    return Request.findByIdAndUpdate(requestId, { status: 'Accepted' })
-                })
-        })
-        .then(request => {
-            const userId = req.body.userId;
-            return User.findById(userId)
-        })
-        .then(user => {
-            let newPoints;
-            if (special == "true")
-                newPoints = user.points - Points_for_Special;
-            else
-                newPoints = user.points - Points_for_Normal;
+    Request.where("time.split(" - ")[0]").gte(1).then(result => {
+        console.log(result)
+    })
+    // time: time, driverId: driverId, date: day 
+    // Request.find({ time: time, driverId: driverId, date: day }).populate('dateId')
+    //     .then(result => {
+    //         return Request.updateMany({ date: day, time: time, driverId: driverId }, { status: 'Rejected' })
+    //     })
+    //     .then(requests => {
+    //         DateO.findOne({ 'times._id': timeId })
+    //             .then(date => {
+    //                 let times = date.times;
+    //                 let index = times.findIndex(item => item._id === timeId);
+    //                 console.log(index)
+    //                 if (times[index].status != 'used') {
+    //                     times[index].status = 'used';
+    //                     date.times = [];
+    //                     date.times = times;
+    //                     return date.save();
+    //                 }
+    //             })
+    //             .then((test) => {
+    //                 console.log(test)
+    //                 return Request.findByIdAndUpdate(requestId, { status: 'Accepted' })
+    //             })
+    //     })
+    //     .then(request => {
+    //         const userId = req.body.userId;
+    //         return User.findById(userId)
+    //     })
+    //     .then(user => {
+    //         let newPoints;
+    //         if (special == "true")
+    //             newPoints = user.points - Points_for_Special;
+    //         else
+    //             newPoints = user.points - Points_for_Normal;
 
-            user.points = newPoints;
-            return user.save();
-        })
-        .then(result => {
-            res.redirect('/requests')
-        })
-        .catch(err => console.log(err))
+    //         user.points = newPoints;
+    //         return user.save();
+    //     })
+    //     .then(result => {
+    //         res.redirect('/requests')
+    //     })
+    //     .catch(err => console.log(err))
 }
 
 exports.rejectRequest = (req, res, next) => {
@@ -207,7 +210,6 @@ exports.postSRequest = (req, res, next) => {
             date = ndate;
             date.times[0].dateId = date._id;
             return date.save();
-
         })
         .then(udate => {
             return Request.create({

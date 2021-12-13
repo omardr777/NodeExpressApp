@@ -1,7 +1,5 @@
 const User = require('../models/user');
 const DateO = require('../models/dateo');
-const TimeO = require('../models/timeO');
-const Request = require('../models/requests')
 const flashMessage = require('../middleware/flashMessage');
 const { validationResult } = require('express-validator')
 
@@ -207,11 +205,9 @@ exports.postDeleteDate = (req, res, next) => {
     DateO.findByIdAndRemove(dateId)
         .then(result => {
             if (result) {
-                // console.log(result)
                 req.flash('success', 'Deleted Successfully')
                 res.redirect('/drivers/schedule')
             } else {
-                // console.log(result)
                 req.flash('error', 'there is a problem')
                 res.redirect('/drivers/schedule')
             }
