@@ -4,8 +4,8 @@ const Request = require('../models/requests')
 const flashMessage = require('../middleware/flashMessage');
 
 const ITEMS_PER_PAGE = 3;
-const Points_for_Special = 50;
-const Points_for_Normal = 10;
+const Points_for_Special_Requests = 50;
+const Points_for_Normal_Requests = 10;
 
 exports.getRequests = (req, res, next) => {
     const driverId = req.user._id;
@@ -64,8 +64,13 @@ exports.postRequest = (req, res, next) => {
             console.log(date.times)
             let index = date.times.findIndex(item => item._id === timeId);
             time = date.times[index];
+            // console.log(time)
+            // timeToInsert = [parseInt(time.from.split(":")[0]) * 60 + parseInt(time.from.split(":")[1]), parseInt(time.to.split(":")[0]) * 60 + parseInt(time.to.split(":")[1])]
+            // console.log(timeToInsert)
             return Request.create({
                 time: time.from + "-" + time.to,
+                fromTime: parseInt(time.from.split(":")[0]) * 60 + parseInt(time.from.split(":")[1]),
+                toTime: parseInt(time.to.split(":")[0]) * 60 + parseInt(time.to.split(":")[1]),
                 timeId: timeId,
                 userId: userId,
                 driverId: driverId,
@@ -93,54 +98,52 @@ exports.acceptRequest = (req, res, next) => {
     const requestId = req.params.requestId;
     let special = req.body.special;
     const timeId = req.body.timeId;
-    const time = req.body.time;
+    const requestTimeF = req.body.fromTime;
+    const requestTimeT = req.body.toTime;
     let day = req.body.date;
     const driverId = req.user._id;
+    Request.updateMany({
+        $or: [
+            //get all requests with the range of posted Request
+            { $and: [{ fromTime: { $gte: requestTimeF } }, { fromTime: { $lte: requestTimeT } }] },
+            { $and: [{ fromTime: { $lt: requestTimeF } }, { toTime: { $gte: requestTimeF } }] },
+        ], driverId: driverId, date: day
+    }, { status: "Rejected" }).populate('dateId')
+        .then(result => {
+            DateO.findOne({ 'times._id': timeId })
+                .then(date => {
+                    let times = date.times;
+                    let index = times.findIndex(item => item._id === timeId);
+                    console.log(index)
+                    if (times[index].status != 'used') {
+                        times[index].status = 'used';
+                        date.times = [];
+                        date.times = times;
+                        return date.save();
+                    }
+                })
+                .then((test) => {
+                    return Request.findByIdAndUpdate(requestId, { status: 'Accepted' })
+                })
+        })
+        .then(result => {
+            const userId = req.body.userId;
+            return User.findById(userId)
+        })
+        .then(user => {
+            let newPoints;
+            if (special == "true")
+                newPoints = user.points - Points_for_Special_Requests;
+            else
+                newPoints = user.points - Points_for_Normal_Requests;
 
-    Request.where("time.split(" - ")[0]").gte(1).then(result => {
-        console.log(result)
-    })
-    // time: time, driverId: driverId, date: day 
-    // Request.find({ time: time, driverId: driverId, date: day }).populate('dateId')
-    //     .then(result => {
-    //         return Request.updateMany({ date: day, time: time, driverId: driverId }, { status: 'Rejected' })
-    //     })
-    //     .then(requests => {
-    //         DateO.findOne({ 'times._id': timeId })
-    //             .then(date => {
-    //                 let times = date.times;
-    //                 let index = times.findIndex(item => item._id === timeId);
-    //                 console.log(index)
-    //                 if (times[index].status != 'used') {
-    //                     times[index].status = 'used';
-    //                     date.times = [];
-    //                     date.times = times;
-    //                     return date.save();
-    //                 }
-    //             })
-    //             .then((test) => {
-    //                 console.log(test)
-    //                 return Request.findByIdAndUpdate(requestId, { status: 'Accepted' })
-    //             })
-    //     })
-    //     .then(request => {
-    //         const userId = req.body.userId;
-    //         return User.findById(userId)
-    //     })
-    //     .then(user => {
-    //         let newPoints;
-    //         if (special == "true")
-    //             newPoints = user.points - Points_for_Special;
-    //         else
-    //             newPoints = user.points - Points_for_Normal;
-
-    //         user.points = newPoints;
-    //         return user.save();
-    //     })
-    //     .then(result => {
-    //         res.redirect('/requests')
-    //     })
-    //     .catch(err => console.log(err))
+            user.points = newPoints;
+            return user.save();
+        })
+        .then(result => {
+            res.redirect('/requests')
+        })
+        .catch(err => console.log(err))
 }
 
 exports.rejectRequest = (req, res, next) => {
@@ -151,14 +154,11 @@ exports.rejectRequest = (req, res, next) => {
             if (oldStatus === 'Accepted') {
                 User.findById(request.userId)
                     .then(user => {
-                        console.log(user)
-                        let newPoints = user.points + Points_for_Special;
+                        let newPoints = user.points + Points_for_Special_Requests;
                         user.points = newPoints;
                         return user.save();
                     })
                     .then(savedUser => {
-                        console.log(savedUser)
-
                         request.status = 'Rejected'
                         return request.save();
                     })
@@ -195,6 +195,8 @@ exports.postSRequest = (req, res, next) => {
     const day = req.body.date;
     const ftime = req.body.ftime;
     const ttime = req.body.ttime;
+    const fromTime = parseInt(ftime.split(":")[0]) * 60 + parseInt(ftime.split(":")[1]);
+    const toTime = parseInt(ttime.split(":")[0]) * 60 + parseInt(ttime.split(":")[1]);
     const description = req.body.description;
     let date;
     let request;
@@ -213,7 +215,8 @@ exports.postSRequest = (req, res, next) => {
         })
         .then(udate => {
             return Request.create({
-                time: udate.times[0].from + "-" + udate.times[0].to,
+                fromTime: fromTime,
+                toTime: toTime,
                 timeId: udate.times[0]._id,
                 userId: udate.userId,
                 driverId: driverId,

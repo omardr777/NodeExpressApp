@@ -18,7 +18,7 @@
                     
                         <li class="orders__item <% if(request.special == true){ %> special <% } %>">
                             <h1 ><%=request.dateId.day  %></h1>
-                            <h1> <%=request.time %> </h1>
+                            <h1> <%=request.time%>  </h1>
                             <ul class="orders__products">
                                 
                                 <li class="orders__products" style="color: black; font-weight: bold; margin-top: 1rem;">from: <%=request.userId.name  %></li>
@@ -35,7 +35,8 @@
                                 <input type="hidden" name="userId" value="<%= request.userId._id %>">
                                 <input type="hidden" name="special" value="<%= request.special %>">
                                 <input type="hidden" name="date" value="<%= request.dateId.day %>">
-                                <input type="hidden" name="time" value="<%= request.time %>">
+                                <input type="hidden" name="fromTime" value="<%= request.fromTime %>">
+                                <input type="hidden" name="toTime" value="<%= request.toTime %>">
                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <% if(request.status == 'Accepted'){ %> 
                                 <button type="submit" class="btn pointer" onclick="return false">Accept</button>

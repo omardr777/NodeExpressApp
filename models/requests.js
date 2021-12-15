@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const requestSchema = new Schema({
-    time: {
-        type: String,
-    },
+    fromTime: Number,
+    toTime: Number,
+    time: String,
     timeId: {
         type: String
     },
