@@ -1,5 +1,5 @@
 # NodeJsProjectF
-Simple implementaion on NodeJs and Express  
+Simple implementaion on NodeJs and ExpressJs
 
 a web site for drivers to schedule there available times and the customer pick the best time of it.
 
